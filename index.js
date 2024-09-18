@@ -102,7 +102,7 @@ function start(client) {
     }
 
     
-    if(chatId === '558994395068@c.us'){
+    if(chatId === '558994210520@c.us'){
 
       const contactName = ('Mensagem recebida de:', message.sender.pushname || 'Contato Desconhecido');
       if (!state[chatId]) {
@@ -129,6 +129,16 @@ function start(client) {
       else if(state[chatId] === 'INFO_PRODUCT') {
         // await client.sendText(chatId, 'Escolha um produto: \n1. SSD M.2 de 256GB\n2. SSD SATA 240GB');
         await handleInfoProduct(client, chatId, message, state, saudacao, contactName);
+      }
+      else if(state[chatId] === 'AWAITING_PRODUCT_CHOICE') {
+        await handleProductMenu(client, chatId, message, state, saudacao, contactName)
+      }
+      else if(state[chatId] === 'AWAITING_ORDER_MENU'){
+        await ShowOrderMenu(client, message, chatId, state, saudacao, contactName);
+      }
+      else if (state[chatId] === 'AWAITING_ORDER_CONFIRMATION') {
+        await AwaitingChoiceOrder(client, message, state, contactName, chatId);
+        return; // Retorna aqui para evitar que o fluxo continue
       }
 
   }
@@ -206,28 +216,52 @@ async function handleMenuChoice(client, chatId, message, state, saudacao, contac
 // Função para exibir o menu de produtos
 async function showProductMenu(client, chatId, state, saudacao, contactName) {
   await client.startTyping(chatId);
-  client.sendText(chatId, 'Aqui estão os nossos produtos:\n1. Produto A\n2. Produto B\n3. Voltar ao menu principal');
+  client.sendText(chatId, '_*Assistente Virtual*_ \nAqui estão os nossos produtos em destaque:\n1. SSD 240GB SATA ADATA\n2. FONE DE OUVIDO BLUETOOTH TWS AIRDOTS\n3. HEADSET BLUETOOTH 5.0 ON-FN628\n0. Voltar ao menu principal');
+  // state[chatId] = 'AWAITING_PRODUCT_CHOICE';
 }
+
+async function ShowOrderMenu(client, message, state, contactName, chatId){
+  await client.startTyping(chatId);
+  client.sendText(chatId, '_*Assistente Virtual*_ \nVocê deseja realizar o pedido do SSD ADATA 240GB?\n\n1. Sim\n2. Não');
+  // await AwaitingChoiceOrder(client, message, state, contactName, chatId)
+}
+
+async function AwaitingChoiceOrder(client, message, state, contactName, chatId) {
+  await client.startTyping(chatId);
+  if (message.body === '1') {
+    await client.sendText(chatId, 'Pedido realizado com sucesso! Agradecemos pela compra.');
+    // Aqui você pode resetar o estado ou direcionar para outro menu
+    state[chatId] = 'ORDER_COMPLETED';
+  } else if (message.body === '2') {
+    await client.sendText(chatId, 'Pedido cancelado. Se precisar de algo mais, estou à disposição!');
+    // Retorna ao menu principal ou ao menu de produtos
+    await showProductMenu(client, chatId, state, saudacao);
+  }
+}
+
 
 // Função para lidar com o menu de produtos
 async function handleProductMenu(client, chatId, message, state, saudacao, contactName) {
   try {
     if (message.body === '1') {
       await client.startTyping(chatId);
-      await client.sendText(chatId, 'Você escolheu o Produto A.');
-    } 
+      await client.sendText(chatId, '_*Assistente Virtual*_\nShow de bola! O SSD ADATA 240GB por R$ 191,50 é um excelente investimento para turbinar seu PC. Com ele, seus jogos e programas vão carregar em um piscar de olhos!\n\nSe quiser saber informações técnicas envie: \n"informações técnicas SSD 240GB ADATA" ou se quiser realizar a compra envie "realizar pedido SSD 240GB ADATA"');
+      state[chatId] = 'AWAITING_ORDER_CONFIRMATION';  
+      await ShowOrderMenu(client, message, state, contactName, chatId);
+    }
     else if (message.body === '2') {
       await client.startTyping(chatId);
-      await client.sendText(chatId, 'Você escolheu o Produto B.');
+      await client.sendText(chatId, 'Ótima escolha! Os Airdots por apenas R$ 60,00 oferecem um som incrível e muita liberdade para você curtir sua música favorita. Quer saber mais sobre a bateria e as funcionalidades ou já quer realizar o pedido?');
     } 
-    else if (message.body === '3') {
+    else if (message.body === '0') {
       showMainMenu(client, chatId, message, contactName, state, saudacao);
       state[chatId] = 'AWAITING_CHOICE';
     } 
     else {
       await client.startTyping(chatId);
       await client.sendText(chatId, '_*Assistente Virtual*_ \nOps, parece que você escolheu uma opção inválida, tente novamente😥');
-      showProductMenu(client, chatId, state, saudacao); // Mostra o menu de produtos novamente
+      await new Promise(resolve => setTimeout(resolve, 1500)); // Espera 1.5 segundos antes de mostrar o menu
+      await showProductMenu(client, chatId, state, saudacao);
     }
   } catch (error) {
     console.error('Erro ao lidar com o menu de produtos:', error);
@@ -264,10 +298,13 @@ async function handleSupport(client, chatId, message, state, saudacao, contactNa
         await client.markUnseenMessage(chatId);
       }
       // Aqui você pode adicionar a lógica para conectar com um atendente
-    } else if (message.body === '2') {
+    } 
+    else if (message.body === '2') {
       showMainMenu(client, chatId, message, contactName, state, saudacao); // Volta ao menu principal
       state[chatId] = 'AWAITING_CHOICE';
-    } else {
+    }
+    
+    else {
       await client.startTyping(chatId);
       await client.sendText(chatId, '_*Assistente Virtual*_ \nOps, parece que você escolheu uma opção inválida, tente novamente😥');
       showSupportMenu(client, chatId, state, saudacao); // Mostra o menu de suporte novamente

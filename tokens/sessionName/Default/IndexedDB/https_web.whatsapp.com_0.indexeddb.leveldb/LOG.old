@@ -1,3 +1,4 @@
-2024/09/15-14:28:54.791 2b3c Reusing MANIFEST C:\Users\Ithal\Documents\DEV\BOT\tokens\sessionName\Default\IndexedDB\https_web.whatsapp.com_0.indexeddb.leveldb/MANIFEST-000001
-2024/09/15-14:28:54.795 2b3c Recovering log #9630
-2024/09/15-14:28:54.802 2b3c Reusing old log C:\Users\Ithal\Documents\DEV\BOT\tokens\sessionName\Default\IndexedDB\https_web.whatsapp.com_0.indexeddb.leveldb/009630.log 
+2024/09/18-16:07:43.954 5b5c Reusing MANIFEST C:\Users\Jorge\Documents\ITHALO_SOUSA\IB_bot\tokens\sessionName\Default\IndexedDB\https_web.whatsapp.com_0.indexeddb.leveldb/MANIFEST-000001
+2024/09/18-16:07:43.956 5b5c Recovering log #278
+2024/09/18-16:07:43.971 5b5c Reusing old log C:\Users\Jorge\Documents\ITHALO_SOUSA\IB_bot\tokens\sessionName\Default\IndexedDB\https_web.whatsapp.com_0.indexeddb.leveldb/000278.log 
+2024/09/18-16:07:45.229 45c4 Manual compaction at level-0 from '\x007\x00\x00\x00' @ 72057594037927935 : 1 .. '\x008\x00\x00\x00' @ 0 : 0; will stop at (end)
