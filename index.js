@@ -72,6 +72,13 @@ venom
 // Definição do estado e saudacao fora da função start
 let state = {};
 let saudacao = {};
+let stateProductOrder = {};
+let nameClient = {};
+let emailClient = {};
+let phoneClient = {};
+let cityClient = {};
+let paymentMethodClient = {};
+let productOrder = {};
 
 function start(client) {
   client.onMessage(async (message) => {
@@ -156,7 +163,19 @@ async function showMainMenu(client, chatId, message, contactName, state, saudaca
     if (!saudacao[chatId]) {
       await client.startTyping(chatId);
       const greetingMessage = getGreetingMessage();
-      await client.reply(chatId, `*Alerta!* Um novo aventureiro se aproximou! ⚔️\nOlá, ${contactName}, ${greetingMessage}! Sou o seu guia virtual na IB Informática. Prepare-se para uma jornada épica nas compras de tecnologia! `, message.id.toString());      
+
+      const saudacaoFrases = [
+        `*Alerta!* Um novo aventureiro se aproximou! ⚔️\nOlá, ${contactName}, ${greetingMessage}! Sou o seu guia virtual na IB Informática. 
+        Prepare-se para uma jornada épica nas compras de tecnologia! `,
+        `*Aviso!* Alarme de cliente detectado!😄 Prepare-se para uma missão épica em busca do produto perfeito!`,
+        `Abra ala! Um novo explorador chegou à nossa ilha do tesouro tecnológico🏝️💻, ola ${contactName}, ${greetingMessage}. Vamos juntos encontrar os melhores produtos?`,
+        `Bem-vindo(a), ${contactName}! Estou à sua disposição para auxiliá-lo(a) em suas compras. Como posso ajudar hoje?`, 
+      ]
+
+      const randomIndex = Math.floor(Math.random() * saudacaoFrases.length);
+      console.log(saudacaoFrases[randomIndex])
+
+      await client.reply(chatId, `${saudacaoFrases[randomIndex]}`, message.id.toString());      
       saudacao[chatId] = 'True';
       
     }
@@ -179,10 +198,13 @@ async function handleMenuChoice(client, chatId, message, state, saudacao, contac
       state[chatId] = 'SHOWING_PRODUCTS';
     } 
     else if (message.body === '2') {
+      await new Promise(resolve => setTimeout(resolve, 1500)); // Espera 1.5 segundos antes de mostrar o menu
       await client.startTyping(chatId);
       await client.sendText(chatId, '_*Assistente Virtual*_ \nAqui, você pode escolher sua arma para vencer a batalha das compras:\nDinheiro: A espada lendária, forte e confiável\n\n - Cartão de débito: O escudo poderoso, que te protege contra imprevistos.\n\n - Cartão de crédito: A varinha mágica, que divide suas compras em até 6x sem juros! ✨\n\n - Pix: A teleporte, que finaliza sua compra em um piscar de olhos.\n\n - Quer saber os poderes de cada arma? Consulte a tabela de parcelamento e escolha a sua! ⚔️️')
+      await new Promise(resolve => setTimeout(resolve, 2500)); // Espera 1.5 segundos antes de mostrar o menu
       await client.startTyping(chatId);
       await client.sendText(chatId, 'Na IB Informática, você encontra diversas formas de pagamento para facilitar sua vida, consulte a tabela de parcelamento abaixo: \n\n- Até R$150: Até 2x sen juros\n- De R$151 a R$300: Até 3x sem juros\n- De R$301 a R$500: Até 5x sem juros\n- Acima de R$500: Até 6x sem juros')
+      await new Promise(resolve => setTimeout(resolve, 2500)); // Espera 1.5 segundos antes de mostrar o menu
       showMainMenu(client, chatId, message, contactName, state, saudacao);
       state[chatId] = 'AWAITING_CHOICE';
     } 
@@ -230,14 +252,33 @@ async function showProductMenu(client, chatId, state, saudacao, contactName) {
 }
 
 async function ShowOrderMenu(client, message, state, contactName, chatId){
+
+  console.log('status de produto: ', stateProductOrder[chatId])
   await client.startTyping(chatId);
-  client.sendText(chatId, '_*Assistente Virtual*_ \nVocê deseja realizar o pedido do SSD ADATA 240GB?\n\n1. Sim\n2. Não');
+  if(stateProductOrder[chatId] == 1){
+    client.sendText(chatId, '_*Assistente Virtual*_ \nVocê deseja realizar o pedido do SSD ADATA 240GB?\n\n1. Sim\n2. Não');
+  }
+  else if(stateProductOrder[chatId] == 2){
+    client.sendText(chatId, '_*Assistente Virtual*_ \nVocê deseja realizar o pedido do FONE DE OUVIDO BLUETOOTH TWS AIRDOTS?\n\n1. Sim\n2. Não');
+  }
+  else if(stateProductOrder[chatId] == 3){
+    client.sendText(chatId, '_*Assistente Virtual*_ \nVocê deseja realizar o pedido do HEADSET BLUETOOTH 5.0 ON-FN628?\n\n1. Sim\n2. Não');
+  }
   // await AwaitingChoiceOrder(client, message, state, contactName, chatId)
 }
 
 async function AwaitingChoiceOrder(client, message, state, contactName, chatId) {
   await client.startTyping(chatId);
   if (message.body === '1') {
+    if(stateProductOrder[chatId] === 1){
+      productOrder[chatId] = 'SSD ADATA 240GB'
+    }
+    else if(stateProductOrder[chatId] === 2){
+      productOrder[chatId] = 'FONE DE OUVIDO BLUETOOTH TWS AIRDOTS'
+    }
+    else if(stateProductOrder[chatId] === 3){
+      productOrder[chatId] = 'HEADSET BLUETOOTH 5.0 ON-FN628'
+    }
     await new Promise(resolve => setTimeout(resolve, 1500)); // Espera 1.5 segundos antes de mostrar o menu
     await client.startTyping(chatId);
     await client.sendText(chatId, '_*Assistente Virtual*_ \nÓtimo, para finalizarmos o seu pedido, informe o seu nome completo.');
@@ -250,6 +291,7 @@ async function AwaitingChoiceOrder(client, message, state, contactName, chatId) 
   } else if (message.body === '2') {
     await client.startTyping(chatId);
     await client.sendText(chatId, '_*Assistente Virtual*_ \nPedido cancelado. Se precisar de algo mais, estou à disposição!');
+    state[chatId] = 'AWAITING_PRODUCT_CHOICE';
     await showProductMenu(client, chatId, state, saudacao);
 
   }
@@ -262,40 +304,53 @@ async function handleDataCollection(client, message, state, chatId) {
   if (currentState === 'COLLECTING_NAME') {
     await new Promise(resolve => setTimeout(resolve, 1500)); // Espera 1.5 segundos antes de mostrar o menu
     await client.startTyping(chatId);
-    state[chatId].name = message.body; // Armazena o nome
+    nameClient[chatId] = message.body; // Armazena o nome
     await client.sendText(chatId, '_*Assistente Virtual*_ \nObrigado! Agora, por favor, informe seu email:');
     state[chatId] = 'COLLECTING_EMAIL'; // Move para o próximo estado
-  } else if (currentState === 'COLLECTING_EMAIL') {
+  } 
+  else if (currentState === 'COLLECTING_EMAIL') {
     if (validateEmail(message.body)) {
       await new Promise(resolve => setTimeout(resolve, 1500)); // Espera 1.5 segundos antes de mostrar o menu
       await client.startTyping(chatId);
-      state[chatId].email = message.body; // Armazena o email
+      emailClient[chatId] = message.body; // Armazena o email
       await client.sendText(chatId, '_*Assistente Virtual*_ \nPerfeito! Agora, informe seu telefone:');
       state[chatId] = 'COLLECTING_PHONE'; // Move para o próximo estado
-    } else {
+    } 
+    else {
       await new Promise(resolve => setTimeout(resolve, 1500)); // Espera 1.5 segundos antes de mostrar o menu
       await client.startTyping(chatId);
       await client.sendText(chatId, '_*Assistente Virtual*_ \nParece que o email está inválido. Por favor, digite um email válido:');
     }
-  } else if (currentState === 'COLLECTING_PHONE') {
+  } 
+  else if (currentState === 'COLLECTING_PHONE') {
     await new Promise(resolve => setTimeout(resolve, 1500)); // Espera 1.5 segundos antes de mostrar o menu
     await client.startTyping(chatId);
-    state[chatId].phone = message.body; // Armazena o telefone
+    phoneClient[chatId] = message.body; // Armazena o telefone
     await client.sendText(chatId, '_*Assistente Virtual*_ \nÓtimo! Agora, por favor, informe o seu endereço completo:\n\n- Cidade\n- Estado\n- Bairro\n- Rua\n- Número da casa\n- CEP');
     state[chatId] = 'COLLECTING_CITY'; // Move para o próximo estado
-  }else if(currentState === 'COLLECTING_CITY'){
+  }
+  else if(currentState === 'COLLECTING_CITY'){
     await new Promise(resolve => setTimeout(resolve, 1500)); // Espera 1.5 segundos antes de mostrar o menu
     await client.startTyping(chatId);
-    state[chatId].city = message.body;
+    cityClient[chatId] = message.body;
     await client.sendText(chatId, '_*Assistente Virtual*_ \nPor último me informe a forma de pagamento desejada: ')
     state[chatId] = 'COLLECTING_PAYMENT_METHOD'; // Move para o próximo estado
-  }else if(currentState === 'COLLECTING_PAYMENT_METHOD'){
+  }
+  else if(currentState === 'COLLECTING_PAYMENT_METHOD'){
+    paymentMethodClient[chatId] = message.body; // Armazena o método de pagamento
     await new Promise(resolve => setTimeout(resolve, 1500)); // Espera 1.5 segundos antes de mostrar o menu
     await client.startTyping(chatId);
-    state[chatId].paymentMethod = message.body; // Armazena o método de pagamento
     await client.sendText(chatId, '_*Assistente Virtual*_ \nPronto, seu pedido foi realizado, em breve seguirá para a separação e posteriomente para a entrega, você será notificado.');
+    
+    await client.startTyping(chatId);
+    await client.sendText(chatId, `_*Assistente Virtual*_ \n\n*DADOS DO PEDIDO*\n\nCliente: ${nameClient[chatId]}\n
+    Email: ${emailClient[chatId]}\nTelefone: ${phoneClient[chatId]}\nEndereço: ${cityClient[chatId]}\n
+    Forma de pagamento: ${paymentMethodClient[chatId]}\nProduto do pedido: ${productOrder[chatId]}`);
+    
+
     state[chatId] = 'AWAITING_CHOICE';
     await showProductMenu(client, chatId, state, saudacao); // Mostra o menu de produtos novamente
+    
     await client.markUnseenMessage(chatId); // Marca a mensagem como não lida para não aparecer na lista de novas mensagens
   }
   // Continue da mesma forma para o estado de coleta de endereço e forma de pagamento...
@@ -315,12 +370,24 @@ async function handleProductMenu(client, chatId, message, state, saudacao, conta
       await client.startTyping(chatId);
       await client.sendText(chatId, '_*Assistente Virtual*_\nShow de bola! O SSD ADATA 240GB por R$ 191,50 é um excelente investimento para turbinar seu PC. Com ele, seus jogos e programas vão carregar em um piscar de olhos!');
       state[chatId] = 'AWAITING_ORDER_CONFIRMATION';  
+      stateProductOrder[chatId] = 1;
       await ShowOrderMenu(client, message, state, contactName, chatId);
     }
     else if (message.body === '2') {
       await client.startTyping(chatId);
-      await client.sendText(chatId, '_*Assistente Virtual*_ \nÓtima escolha! Os Airdots por apenas R$ 60,00 oferecem um som incrível e muita liberdade para você curtir sua música favorita. Quer saber mais sobre a bateria e as funcionalidades ou já quer realizar o pedido?');
+      await client.sendText(chatId, '_*Assistente Virtual*_ \nÓtima escolha! Os Airdots por apenas R$ 60,00 oferecem um som incrível e muita liberdade para você curtir sua música favorita!');
+      state[chatId] = 'AWAITING_ORDER_CONFIRMATION';  
+      stateProductOrder[chatId] = 2;
+      await ShowOrderMenu(client, message, state, contactName, chatId);
+    }
+    else if(message.body === '3') {
+      await client.startTyping(chatId);
+      await client.sendText(chatId, '_*Assistente Virtual*_ \Perfeito para gamers e profissionais! O headset ON-FN628 por R$ 70,00 oferece um som surround de alta qualidade e um microfone com cancelamento de ruído.');
+      state[chatId] = 'AWAITING_ORDER_CONFIRMATION';  
+      stateProductOrder[chatId] = 3;
+      await ShowOrderMenu(client, message, state, contactName, chatId);
     } 
+
     else if (message.body === '0') {
       console.log('aqui estamos')
       showMainMenu(client, chatId, message, contactName, state, saudacao);
