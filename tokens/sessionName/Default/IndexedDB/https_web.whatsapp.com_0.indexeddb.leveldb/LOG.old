@@ -1,4 +1,26 @@
-2024/09/18-16:07:43.954 5b5c Reusing MANIFEST C:\Users\Jorge\Documents\ITHALO_SOUSA\IB_bot\tokens\sessionName\Default\IndexedDB\https_web.whatsapp.com_0.indexeddb.leveldb/MANIFEST-000001
-2024/09/18-16:07:43.956 5b5c Recovering log #278
-2024/09/18-16:07:43.971 5b5c Reusing old log C:\Users\Jorge\Documents\ITHALO_SOUSA\IB_bot\tokens\sessionName\Default\IndexedDB\https_web.whatsapp.com_0.indexeddb.leveldb/000278.log 
-2024/09/18-16:07:45.229 45c4 Manual compaction at level-0 from '\x007\x00\x00\x00' @ 72057594037927935 : 1 .. '\x008\x00\x00\x00' @ 0 : 0; will stop at (end)
+2024/09/23-11:56:12.819 57d8 Reusing MANIFEST C:\Users\Jorge\Documents\ITHALO_SOUSA\IB_bot\tokens\sessionName\Default\IndexedDB\https_web.whatsapp.com_0.indexeddb.leveldb/MANIFEST-000001
+2024/09/23-11:56:12.824 57d8 Recovering log #652
+2024/09/23-11:56:12.851 57d8 Reusing old log C:\Users\Jorge\Documents\ITHALO_SOUSA\IB_bot\tokens\sessionName\Default\IndexedDB\https_web.whatsapp.com_0.indexeddb.leveldb/000652.log 
+2024/09/23-11:56:14.134 55f4 Level-0 table #663: started
+2024/09/23-11:56:14.165 55f4 Level-0 table #663: 751865 bytes OK
+2024/09/23-11:56:14.170 55f4 Delete type=0 #652
+2024/09/23-11:56:14.171 6394 Manual compaction at level-0 from '\x00b\x00\x00\x00' @ 72057594037927935 : 1 .. '\x00c\x00\x00\x00' @ 0 : 0; will stop at (end)
+2024/09/23-11:56:15.321 57d8 Compacting 1@1 + 7@2 files
+2024/09/23-11:56:15.432 57d8 Generated table #664@1: 87414 keys, 2236329 bytes
+2024/09/23-11:56:15.518 57d8 Generated table #665@1: 55370 keys, 2251270 bytes
+2024/09/23-11:56:15.571 57d8 Generated table #666@1: 2647 keys, 2156490 bytes
+2024/09/23-11:56:15.630 57d8 Generated table #667@1: 9003 keys, 2164129 bytes
+2024/09/23-11:56:15.745 57d8 Generated table #668@1: 28576 keys, 2238285 bytes
+2024/09/23-11:56:15.821 57d8 Generated table #669@1: 55898 keys, 2192662 bytes
+2024/09/23-11:56:15.923 57d8 Generated table #670@1: 106213 keys, 2258072 bytes
+2024/09/23-11:56:15.932 57d8 Generated table #671@1: 323 keys, 23402 bytes
+2024/09/23-11:56:15.932 57d8 Compacted 1@1 + 7@2 files => 15520639 bytes
+2024/09/23-11:56:15.936 57d8 compacted to: files[ 0 0 8 0 0 0 0 ]
+2024/09/23-11:56:15.936 57d8 Delete type=2 #654
+2024/09/23-11:56:15.937 57d8 Delete type=2 #655
+2024/09/23-11:56:15.937 57d8 Delete type=2 #656
+2024/09/23-11:56:15.937 57d8 Delete type=2 #657
+2024/09/23-11:56:15.937 57d8 Delete type=2 #658
+2024/09/23-11:56:15.937 57d8 Delete type=2 #659
+2024/09/23-11:56:15.937 57d8 Delete type=2 #660
+2024/09/23-11:56:15.937 57d8 Delete type=2 #663

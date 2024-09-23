@@ -1,23 +1,4 @@
-2024/09/18-16:09:59.700 1d80 Reusing MANIFEST C:\Users\Jorge\Documents\ITHALO_SOUSA\IB_bot\tokens\sessionName\Default\IndexedDB\https_web.whatsapp.com_0.indexeddb.leveldb/MANIFEST-000001
-2024/09/18-16:09:59.703 1d80 Recovering log #278
-2024/09/18-16:09:59.744 1d80 Reusing old log C:\Users\Jorge\Documents\ITHALO_SOUSA\IB_bot\tokens\sessionName\Default\IndexedDB\https_web.whatsapp.com_0.indexeddb.leveldb/000278.log 
-2024/09/18-16:10:00.978 6a30 Manual compaction at level-0 from '\x008\x00\x00\x00' @ 72057594037927935 : 1 .. '\x009\x00\x00\x00' @ 0 : 0; will stop at (end)
-2024/09/18-16:10:11.596 1d80 Level-0 table #288: started
-2024/09/18-16:10:11.634 1d80 Level-0 table #288: 1210529 bytes OK
-2024/09/18-16:10:11.639 1d80 Delete type=0 #278
-2024/09/18-16:10:12.281 1d80 Compacting 1@1 + 6@2 files
-2024/09/18-16:10:12.374 1d80 Generated table #289@1: 68205 keys, 2238146 bytes
-2024/09/18-16:10:12.430 1d80 Generated table #290@1: 2667 keys, 2157175 bytes
-2024/09/18-16:10:12.484 1d80 Generated table #291@1: 8834 keys, 2167651 bytes
-2024/09/18-16:10:12.575 1d80 Generated table #292@1: 24773 keys, 2223142 bytes
-2024/09/18-16:10:12.660 1d80 Generated table #293@1: 85332 keys, 2232298 bytes
-2024/09/18-16:10:12.704 1d80 Generated table #294@1: 53431 keys, 1152932 bytes
-2024/09/18-16:10:12.704 1d80 Compacted 1@1 + 6@2 files => 12171344 bytes
-2024/09/18-16:10:12.707 1d80 compacted to: files[ 0 0 6 0 0 0 0 ]
-2024/09/18-16:10:12.707 1d80 Delete type=2 #280
-2024/09/18-16:10:12.708 1d80 Delete type=2 #281
-2024/09/18-16:10:12.708 1d80 Delete type=2 #282
-2024/09/18-16:10:12.708 1d80 Delete type=2 #283
-2024/09/18-16:10:12.708 1d80 Delete type=2 #284
-2024/09/18-16:10:12.708 1d80 Delete type=2 #285
-2024/09/18-16:10:12.708 1d80 Delete type=2 #288
+2024/09/23-11:57:12.412 3ba4 Reusing MANIFEST C:\Users\Jorge\Documents\ITHALO_SOUSA\IB_bot\tokens\sessionName\Default\IndexedDB\https_web.whatsapp.com_0.indexeddb.leveldb/MANIFEST-000001
+2024/09/23-11:57:12.415 3ba4 Recovering log #662
+2024/09/23-11:57:12.436 3ba4 Reusing old log C:\Users\Jorge\Documents\ITHALO_SOUSA\IB_bot\tokens\sessionName\Default\IndexedDB\https_web.whatsapp.com_0.indexeddb.leveldb/000662.log 
+2024/09/23-11:57:13.738 4e00 Manual compaction at level-0 from '\x00c\x00\x00\x00' @ 72057594037927935 : 1 .. '\x00d\x00\x00\x00' @ 0 : 0; will stop at (end)
