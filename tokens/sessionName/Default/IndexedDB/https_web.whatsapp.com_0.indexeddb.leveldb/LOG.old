@@ -1,27 +1,4 @@
-2024/09/23-16:52:03.016 47c Reusing MANIFEST C:\Users\Jorge\Documents\ITHALO_SOUSA\IB_bot\tokens\sessionName\Default\IndexedDB\https_web.whatsapp.com_0.indexeddb.leveldb/MANIFEST-000001
-2024/09/23-16:52:03.018 47c Recovering log #860
-2024/09/23-16:52:03.021 47c Reusing old log C:\Users\Jorge\Documents\ITHALO_SOUSA\IB_bot\tokens\sessionName\Default\IndexedDB\https_web.whatsapp.com_0.indexeddb.leveldb/000860.log 
-2024/09/23-16:52:04.351 8238 Level-0 table #872: started
-2024/09/23-16:52:04.365 8238 Level-0 table #872: 139900 bytes OK
-2024/09/23-16:52:04.368 8238 Delete type=0 #860
-2024/09/23-16:52:04.369 1dbc Manual compaction at level-0 from '\x00~\x00\x00\x00' @ 72057594037927935 : 1 .. '\x00\x7f\x00\x00\x00' @ 0 : 0; will stop at (end)
-2024/09/23-16:52:05.504 1dbc Compacting 1@1 + 8@2 files
-2024/09/23-16:52:05.603 1dbc Generated table #873@1: 85344 keys, 2234986 bytes
-2024/09/23-16:52:05.685 1dbc Generated table #874@1: 84202 keys, 2286064 bytes
-2024/09/23-16:52:05.746 1dbc Generated table #875@1: 8335 keys, 2164252 bytes
-2024/09/23-16:52:05.891 1dbc Generated table #876@1: 3043 keys, 2161302 bytes
-2024/09/23-16:52:06.010 1dbc Generated table #877@1: 23054 keys, 2228837 bytes
-2024/09/23-16:52:06.127 1dbc Generated table #878@1: 18162 keys, 2159753 bytes
-2024/09/23-16:52:06.230 1dbc Generated table #879@1: 105688 keys, 2257786 bytes
-2024/09/23-16:52:06.296 1dbc Generated table #880@1: 60227 keys, 1302467 bytes
-2024/09/23-16:52:06.297 1dbc Compacted 1@1 + 8@2 files => 16795447 bytes
-2024/09/23-16:52:06.301 1dbc compacted to: files[ 0 0 8 0 0 0 0 ]
-2024/09/23-16:52:06.301 1dbc Delete type=2 #862
-2024/09/23-16:52:06.301 1dbc Delete type=2 #863
-2024/09/23-16:52:06.301 1dbc Delete type=2 #864
-2024/09/23-16:52:06.301 1dbc Delete type=2 #865
-2024/09/23-16:52:06.301 1dbc Delete type=2 #866
-2024/09/23-16:52:06.301 1dbc Delete type=2 #867
-2024/09/23-16:52:06.301 1dbc Delete type=2 #868
-2024/09/23-16:52:06.301 1dbc Delete type=2 #869
-2024/09/23-16:52:06.302 1dbc Delete type=2 #872
+2024/09/23-17:40:05.270 52f0 Reusing MANIFEST C:\Users\Jorge\Documents\ITHALO_SOUSA\IB_bot\tokens\sessionName\Default\IndexedDB\https_web.whatsapp.com_0.indexeddb.leveldb/MANIFEST-000001
+2024/09/23-17:40:05.276 52f0 Recovering log #1016
+2024/09/23-17:40:05.330 52f0 Reusing old log C:\Users\Jorge\Documents\ITHALO_SOUSA\IB_bot\tokens\sessionName\Default\IndexedDB\https_web.whatsapp.com_0.indexeddb.leveldb/001016.log 
+2024/09/23-17:40:06.929 2918 Manual compaction at level-0 from '\x00\x93\x00\x00\x00' @ 72057594037927935 : 1 .. '\x00\x94\x00\x00\x00' @ 0 : 0; will stop at (end)
