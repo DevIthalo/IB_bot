@@ -131,7 +131,7 @@ client.on('message', async (message) => {
       if (mensagem.includes('ssd m.2') && mensagem.includes('pedido') && chatId === '558994210520@c.us') {
           const produto = 'SSD M.2 de 256GB';
           // const buttons = produtos[produto].menu.map(opcao => ({ body: opcao }));
-          await client.sendText(chatId, 'Ótima escolha! O SSD M.2 de 256GB é perfeito para quem busca mais desempenho e agilidade. Ele oferece velocidades de leitura e escrita impressionantes, além de ser super compacto, isso tudo saindo por apenas *R$222,82* à vista ou em até 3x no cartão sem juros! ');
+          await client.sendMessage(chatId, 'Ótima escolha! O SSD M.2 de 256GB é perfeito para quem busca mais desempenho e agilidade. Ele oferece velocidades de leitura e escrita impressionantes, além de ser super compacto, isso tudo saindo por apenas *R$222,82* à vista ou em até 3x no cartão sem juros! ');
           state[chatId] = 'INFO_PRODUCT';
           console.log(state[chatId]);
       } 
@@ -152,37 +152,39 @@ client.on('message', async (message) => {
             console.log(state[chatId]);
           }
         }
+
+        const chat = await client.getChatById(chatId);
   
         // Verifica o estado atual do usuário e age de acordo
         if (state[chatId] === 'MENU') {
-          await showMainMenu(client, chatId, message, contactName, state, saudacao, contactName);
+          await showMainMenu(client, chatId, message, contactName, state, saudacao, contactName, chat);
           state[chatId] = 'AWAITING_CHOICE';
         }
          else if (state[chatId] === 'AWAITING_CHOICE') {
-          await handleMenuChoice(client, chatId, message, state, saudacao, contactName);
+          await handleMenuChoice(client, chatId, message, state, saudacao, contactName, chat);
         } 
         else if (state[chatId] === 'SHOWING_PRODUCTS') {
-          await handleProductMenu(client, chatId, message, state, saudacao, contactName);
+          await handleProductMenu(client, chatId, message, state, saudacao, contactName, chat);
         } 
         else if (state[chatId] === 'SUPPORT') {
-          await handleSupport(client, chatId, message, state, saudacao, contactName);
+          await handleSupport(client, chatId, message, state, saudacao, contactName, chat);
         }
         else if(state[chatId] === 'INFO_PRODUCT') {
-          // await client.sendText(chatId, 'Escolha um produto: \n1. SSD M.2 de 256GB\n2. SSD SATA 240GB');
-          await handleInfoProduct(client, chatId, message, state, saudacao, contactName);
+          // await client.sendMessage(chatId, 'Escolha um produto: \n1. SSD M.2 de 256GB\n2. SSD SATA 240GB');
+          await handleInfoProduct(client, chatId, message, state, saudacao, contactName, chat);
         }
         else if(state[chatId] === 'AWAITING_PRODUCT_CHOICE') {
-          await handleProductMenu(client, chatId, message, state, saudacao, contactName)
+          await handleProductMenu(client, chatId, message, state, saudacao, contactName, chat)
         }
         else if(state[chatId] === 'AWAITING_ORDER_MENU'){
-          await ShowOrderMenu(client, message, chatId, state, saudacao, contactName);
+          await ShowOrderMenu(client, message, chatId, state, saudacao, contactName, chat);
         }
         else if (state[chatId] === 'AWAITING_ORDER_CONFIRMATION') {
-          await AwaitingChoiceOrder(client, message, state, contactName, chatId);
+          await AwaitingChoiceOrder(client, message, state, contactName, chatId, chat);
           return; // Retorna aqui para evitar que o fluxo continue
         }
         else  if(state[chatId].includes('COLLECTING_')){
-          handleDataCollection(client, message, state, chatId)
+          handleDataCollection(client, message, state, chatId, chat)
         }
     }
 
@@ -190,7 +192,7 @@ client.on('message', async (message) => {
 
 //=================================================================================
 // FUNÇÃO PARA MOSTRAR O MENU PRINCIPAL
-async function showMainMenu(client, chatId, message, contactName, state, saudacao) {
+async function showMainMenu(client, chatId, message, contactName, state, saudacao, chat) {
     try {
         const chat = await client.getChatById(chatId);
 
@@ -225,23 +227,23 @@ async function showMainMenu(client, chatId, message, contactName, state, saudaca
 
 //=================================================================================
 // FUNÇÃO PARA LIDAR COM A ESCOLHA DO MENU PRINCIPAL
-async function handleMenuChoice(client, chatId, message, state, saudacao, contactName) {
+async function handleMenuChoice(client, chatId, message, state, saudacao, contactName, chat) {
     try {
-      const contactName = message.sender.pushname || 'Contato Desconhecido';
+      const contactName = message._data.notifyName || 'Contato Desconhecido';
       console.log(message.body)
       console.log(message.body === '1')
       if (message.body === '1') {
-        // await client.sendText(chatId, 'Você escolheu Ver Produtos.');
-        showProductMenu(client, chatId, state, saudacao); // Chama o menu de produtos
+        // await client.sendMessage(chatId, 'Você escolheu Ver Produtos.');
+        showProductMenu(client, chatId, state, saudacao, chat); // Chama o menu de produtos
         state[chatId] = 'SHOWING_PRODUCTS';
       } 
       else if (message.body === '2') {
         await new Promise(resolve => setTimeout(resolve, 1500)); // Espera 1.5 segundos antes de mostrar o menu
-        await client.startTyping(chatId);
-        await client.sendText(chatId, '_*Assistente Virtual*_ \nAqui, você pode escolher sua arma para vencer a batalha das compras:\nDinheiro: A espada lendária, forte e confiável\n\n - Cartão de débito: O escudo poderoso, que te protege contra imprevistos.\n\n - Cartão de crédito: A varinha mágica, que divide suas compras em até 6x sem juros! ✨\n\n - Pix: A teleporte, que finaliza sua compra em um piscar de olhos.\n\n - Quer saber os poderes de cada arma? Consulte a tabela de parcelamento e escolha a sua! ⚔️️')
+        await chat.sendStateTyping();
+        await client.sendMessage(chatId, '_*Assistente Virtual*_ \nAqui, você pode escolher sua arma para vencer a batalha das compras:\nDinheiro: A espada lendária, forte e confiável\n\n - Cartão de débito: O escudo poderoso, que te protege contra imprevistos.\n\n - Cartão de crédito: A varinha mágica, que divide suas compras em até 6x sem juros! ✨\n\n - Pix: A teleporte, que finaliza sua compra em um piscar de olhos.\n\n - Quer saber os poderes de cada arma? Consulte a tabela de parcelamento e escolha a sua! ⚔️️')
         await new Promise(resolve => setTimeout(resolve, 2500)); // Espera 1.5 segundos antes de mostrar o menu
-        await client.startTyping(chatId);
-        await client.sendText(chatId, 'Na IB Informática, você encontra diversas formas de pagamento para facilitar sua vida, consulte a tabela de parcelamento abaixo: \n\n- Até R$150: Até 2x sen juros\n- De R$151 a R$300: Até 3x sem juros\n- De R$301 a R$500: Até 5x sem juros\n- Acima de R$500: Até 6x sem juros')
+        await chat.sendStateTyping();
+        await client.sendMessage(chatId, 'Na IB Informática, você encontra diversas formas de pagamento para facilitar sua vida, consulte a tabela de parcelamento abaixo: \n\n- Até R$150: Até 2x sen juros\n- De R$151 a R$300: Até 3x sem juros\n- De R$301 a R$500: Até 5x sem juros\n- Acima de R$500: Até 6x sem juros')
         await new Promise(resolve => setTimeout(resolve, 2500)); // Espera 1.5 segundos antes de mostrar o menu
         showMainMenu(client, chatId, message, contactName, state, saudacao);
         state[chatId] = 'AWAITING_CHOICE';
@@ -252,29 +254,36 @@ async function handleMenuChoice(client, chatId, message, state, saudacao, contac
         const hour = now.getHours();
   
         if(diaAtual != 'Domingo' && hour > 8 && hour < 12 && hour > 14 && hour < 18){
-          await client.startTyping(chatId);
+          await chat.sendStateTyping();
           showSupportMenu(client, chatId, state, saudacao); // Chama o menu de suporte
           state[chatId] = 'SUPPORT';
         }
   
         else if(diaAtual == 'Domingo'){
-          await client.startTyping(chatId);
-          await client.sendText(chatId, '_*Assistente Virtual*_ \nLamento mas nosso serviço de suporte funciona apenas de segunda à sexta-feira de 08h às 12h e de 14h às 18h e aos sabádos de 08h às 12h.');
-          showMainMenu(client, chatId, message, contactName, state, saudacao);
+          await chat.sendStateTyping();
+          await client.sendMessage(chatId, '_*Assistente Virtual*_ \nLamento mas nosso serviço de suporte funciona apenas de segunda à sexta-feira de 08h às 12h e de 14h às 18h e aos sabádos de 08h às 12h.');
+          showMainMenu(client, chatId, message, contactName, state, saudacao, chat);
           state[chatId] = 'AWAITING_CHOICE';
-          await client.markUnseenMessage(chatId);
+          await chat.markUnread(chatId);
+        }
+        else{
+            await chat.sendStateTyping();
+            await client.sendMessage(chatId, '_*Assistente Virtual*_ \nNosso serviço de suporte funciona apenas de segunda à sexta-feira de 08h às 12h e de 14h às 18h.');
+            showMainMenu(client, chatId, message, contactName, state, saudacao, chat);
+            state[chatId] = 'AWAITING_CHOICE';
+            await chat.markUnread(chatId);
         }
       } 
       else if (message.body === '0') {
-        await client.startTyping(chatId);
-        await client.sendText(chatId, '_*Assistente Virtual*_ \nAgradecemos o seu contato, volte logo, e não se esqueça, _somos o seu parceiro de confiança em tecnologia!_ 😙');
+        await chat.sendStateTyping();
+        await client.sendMessage(chatId, '_*Assistente Virtual*_ \nAgradecemos o seu contato, volte logo, e não se esqueça, _somos o seu parceiro de confiança em tecnologia!_ 😙');
         delete state[chatId]; // Reseta o estado para finalizar a conversa
         delete saudacao[chatId];
       } 
       else {
-        await client.startTyping(chatId);
-        await client.sendText(chatId, '_*Assistente Virtual*_ \nOps, parece que você escolheu uma opção inválida, tente novamente😥');
-        showMainMenu(client, chatId, message, contactName, state, saudacao); // Mostra o menu novamente
+        await chat.sendStateTyping();
+        await client.sendMessage(chatId, '_*Assistente Virtual*_ \nOps, parece que você escolheu uma opção inválida, tente novamente😥');
+        showMainMenu(client, chatId, message, contactName, state, saudacao, chat); // Mostra o menu novamente
         console.log('aqui');
       }
     } catch (error) {
@@ -285,11 +294,264 @@ async function handleMenuChoice(client, chatId, message, state, saudacao, contac
 
 //=================================================================================
 // FUNÇÃO PARA EXIBIR O MENU DE PRODUTOS
-async function showProductMenu(client, chatId, state, saudacao, contactName) {
-    await client.startTyping(chatId);
-    client.sendText(chatId, '_*Assistente Virtual*_ \nAqui estão os nossos produtos em destaque:\n1. SSD 240GB SATA ADATA\n2. FONE DE OUVIDO BLUETOOTH TWS AIRDOTS\n3. HEADSET BLUETOOTH 5.0 ON-FN628\n0. Voltar ao menu principal');
+async function showProductMenu(client, chatId, state, saudacao, contactName, chat) {
+    const chat1 = await client.getChatById(chatId);
+
+    // Agora, você pode chamar sendStateTyping no chat
+    await chat1.sendStateTyping();
+    client.sendMessage(chatId, '_*Assistente Virtual*_ \nAqui estão os nossos produtos em destaque:\n1. SSD 240GB SATA ADATA\n2. FONE DE OUVIDO BLUETOOTH TWS AIRDOTS\n3. HEADSET BLUETOOTH 5.0 ON-FN628\n0. Voltar ao menu principal');
     // state[chatId] = 'AWAITING_PRODUCT_CHOICE';
   }
+
+//=================================================================================
+// FUNÇÃO PARA EXIBIR O MENU DE ORDEM DE PEDIDO
+async function ShowOrderMenu(client, message, state, contactName, chatId, chat){
+
+    console.log('status de produto: ', stateProductOrder[chatId])
+    await chat.sendStateTyping();
+    if(stateProductOrder[chatId] == 1){
+      client.sendMessage(chatId, '_*Assistente Virtual*_ \nVocê deseja realizar o pedido do SSD ADATA 240GB?\n\n1. Sim\n2. Não');
+    }
+    else if(stateProductOrder[chatId] == 2){
+      client.sendMessage(chatId, '_*Assistente Virtual*_ \nVocê deseja realizar o pedido do FONE DE OUVIDO BLUETOOTH TWS AIRDOTS?\n\n1. Sim\n2. Não');
+    }
+    else if(stateProductOrder[chatId] == 3){
+      client.sendMessage(chatId, '_*Assistente Virtual*_ \nVocê deseja realizar o pedido do HEADSET BLUETOOTH 5.0 ON-FN628?\n\n1. Sim\n2. Não');
+    }
+    // await AwaitingChoiceOrder(client, message, state, contactName, chatId)
+  }
+//============================================================================
+// FUNÇÃO PARA LIDAR COM A ESCOLHA DO PRODUTO
+async function AwaitingChoiceOrder(client, message, state, contactName, chatId, chat) {
+    await chat.sendStateTyping();
+    if (message.body === '1') {
+      if(stateProductOrder[chatId] === 1){
+        productOrder[chatId] = 'SSD ADATA 240GB'
+      }
+      else if(stateProductOrder[chatId] === 2){
+        productOrder[chatId] = 'FONE DE OUVIDO BLUETOOTH TWS AIRDOTS'
+      }
+      else if(stateProductOrder[chatId] === 3){
+        productOrder[chatId] = 'HEADSET BLUETOOTH 5.0 ON-FN628'
+      }
+      await new Promise(resolve => setTimeout(resolve, 1500)); // Espera 1.5 segundos antes de mostrar o menu
+      await chat.sendStateTyping();
+      await client.sendMessage(chatId, '_*Assistente Virtual*_ \nÓtimo, para finalizarmos o seu pedido, informe o seu nome completo.');
+  
+      // Iniciar a coleta dos dados
+      state[chatId] = 'COLLECTING_NAME'; // Inicia com a coleta do nome
+      await new Promise(resolve => setTimeout(resolve, 1500)); // Espera 1.5 segundos antes de mostrar o menu
+      await chat.sendStateTyping();
+      // await client.sendMessage(chatId, '_*Assistente Virtual*_ \nPor favor, digite seu nome completo:');
+    } else if (message.body === '2') {
+      await chat.sendStateTyping();
+      await client.sendMessage(chatId, '_*Assistente Virtual*_ \nPedido cancelado. Se precisar de algo mais, estou à disposição!');
+      state[chatId] = 'AWAITING_PRODUCT_CHOICE';
+      await showProductMenu(client, chatId, state, saudacao, chat);
+  
+    }
+  }
+//================================================================
+// FUNÇÃO PARA LIDAR COM A COLETA DE DADOS
+async function handleDataCollection(client, message, state, chatId, chat) {
+    const currentState = state[chatId];
+  
+    if (currentState === 'COLLECTING_NAME') {
+      await new Promise(resolve => setTimeout(resolve, 1500)); // Espera 1.5 segundos antes de mostrar o menu
+      await chat.sendStateTyping();
+      nameClient[chatId] = message.body; // Armazena o nome
+      await client.sendMessage(chatId, '_*Assistente Virtual*_ \nObrigado! Agora, por favor, informe seu email:');
+      state[chatId] = 'COLLECTING_EMAIL'; // Move para o próximo estado
+    } 
+    else if (currentState === 'COLLECTING_EMAIL') {
+      if (validateEmail(message.body)) {
+        await new Promise(resolve => setTimeout(resolve, 1500)); // Espera 1.5 segundos antes de mostrar o menu
+        await chat.sendStateTyping();
+        emailClient[chatId] = message.body; // Armazena o email
+        await client.sendMessage(chatId, '_*Assistente Virtual*_ \nPerfeito! Agora, informe seu telefone:');
+        state[chatId] = 'COLLECTING_PHONE'; // Move para o próximo estado
+      } 
+      else {
+        await new Promise(resolve => setTimeout(resolve, 1500)); // Espera 1.5 segundos antes de mostrar o menu
+        await chat.sendStateTyping();
+        await client.sendMessage(chatId, '_*Assistente Virtual*_ \nParece que o email está inválido. Por favor, digite um email válido:');
+      }
+    } 
+    else if (currentState === 'COLLECTING_PHONE') {
+      await new Promise(resolve => setTimeout(resolve, 1500)); // Espera 1.5 segundos antes de mostrar o menu
+      await chat.sendStateTyping();
+      phoneClient[chatId] = message.body; // Armazena o telefone
+      await client.sendMessage(chatId, '_*Assistente Virtual*_ \nÓtimo! Agora, por favor, informe o seu endereço completo:\n\n- Cidade\n- Estado\n- Bairro\n- Rua\n- Número da casa\n- CEP');
+      state[chatId] = 'COLLECTING_CITY'; // Move para o próximo estado
+    }
+    else if(currentState === 'COLLECTING_CITY'){
+      await new Promise(resolve => setTimeout(resolve, 1500)); // Espera 1.5 segundos antes de mostrar o menu
+      await chat.sendStateTyping();
+      cityClient[chatId] = message.body;
+      await client.sendMessage(chatId, '_*Assistente Virtual*_ \nPor último me informe a forma de pagamento desejada: ')
+      state[chatId] = 'COLLECTING_PAYMENT_METHOD'; // Move para o próximo estado
+    }
+    else if(currentState === 'COLLECTING_PAYMENT_METHOD'){
+      paymentMethodClient[chatId] = message.body; // Armazena o método de pagamento
+      await new Promise(resolve => setTimeout(resolve, 1500)); // Espera 1.5 segundos antes de mostrar o menu
+      await chat.sendStateTyping();
+      await client.sendMessage(chatId, '_*Assistente Virtual*_ \nPronto, seu pedido foi realizado, em breve seguirá para a separação e posteriomente para a entrega, você será notificado.');
+      
+      await chat.sendStateTyping();
+      await client.sendMessage(chatId, `_*Assistente Virtual*_ \n\n*DADOS DO PEDIDO*\n\nCliente: ${nameClient[chatId]}\nEmail: ${emailClient[chatId]}\nTelefone: ${phoneClient[chatId]}\nEndereço: ${cityClient[chatId]}\nForma de pagamento: ${paymentMethodClient[chatId]}\nProduto do pedido: ${productOrder[chatId]}`);
+      
+      const chatID = await client.getChatById('120363168227938807@g.us');
+      let text = "";
+      let mentions = [];
+      const author = await message.getContact();
+      const botWid = client.info.wid;
+      
+      for (let participant of chatID.participants) {
+          if (participant.id.user !== botWid.user){
+              const contact = await client.getContactById(participant.id._serialized);
+              mentions.push(participant.id._serialized);  // Adiciona diretamente o ID do participante
+              text += `@${participant.id.user} `;
+          }
+      }
+      await chatID.sendMessage(`_*Assistente Virtual*_ \n\n*DADOS DO PEDIDO*\n\nCliente: ${nameClient[chatId]}\nEmail: ${emailClient[chatId]}\nTelefone: ${phoneClient[chatId]}\nEndereço: ${cityClient[chatId]}\nForma de pagamento: ${paymentMethodClient[chatId]}\nProduto do pedido: ${productOrder[chatId]}\n\n${text}`, { mentions });
+
+    //   await client.startTyping('120363168227938807@c.us');
+    // await client.sendMessage('120363168227938807@g.us', `_*Assistente Virtual*_ \n\n*DADOS DO PEDIDO*\n\nCliente: ${nameClient[chatId]}\nEmail: ${emailClient[chatId]}\nTelefone: ${phoneClient[chatId]}\nEndereço: ${cityClient[chatId]}\nForma de pagamento: ${paymentMethodClient[chatId]}\nProduto do pedido: ${productOrder[chatId]}`);
+    
+      state[chatId] = 'AWAITING_CHOICE';
+      await showProductMenu(client, chatId, state, saudacao, chat); // Mostra o menu de produtos novamente
+      
+      await chat.markUnread(chatId);// Marca a mensagem como não lida para não aparecer na lista de novas mensagens
+    }
+    // Continue da mesma forma para o estado de coleta de endereço e forma de pagamento...
+  }
+//================================================================
+// FUNÇÃO PARA VALIDAR O E-MAIL
+function validateEmail(email) {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(String(email).toLowerCase());
+  }
+
+//================================================================
+// FUNÇÃO PARA LIDAR COM O MENU DE PRODUTOS
+async function handleProductMenu(client, chatId, message, state, saudacao, contactName, chat) {
+    try {
+      if (message.body === '1') {
+        await chat.sendStateTyping();
+        await client.sendMessage(chatId, '_*Assistente Virtual*_\nShow de bola! O SSD ADATA 240GB por R$ 191,50 é um excelente investimento para turbinar seu PC. Com ele, seus jogos e programas vão carregar em um piscar de olhos!');
+        state[chatId] = 'AWAITING_ORDER_CONFIRMATION';  
+        stateProductOrder[chatId] = 1;
+        await ShowOrderMenu(client, message, state, contactName, chatId, chat);
+      }
+      else if (message.body === '2') {
+        await chat.sendStateTyping();
+        await client.sendMessage(chatId, '_*Assistente Virtual*_ \nÓtima escolha! Os Airdots por apenas R$ 60,00 oferecem um som incrível e muita liberdade para você curtir sua música favorita!');
+        state[chatId] = 'AWAITING_ORDER_CONFIRMATION';  
+        stateProductOrder[chatId] = 2;
+        await ShowOrderMenu(client, message, state, contactName, chatId, chat);
+      }
+      else if(message.body === '3') {
+        await chat.sendStateTyping();
+        await client.sendMessage(chatId, '_*Assistente Virtual*_ \Perfeito para gamers e profissionais! O headset ON-FN628 por R$ 70,00 oferece um som surround de alta qualidade e um microfone com cancelamento de ruído.');
+        state[chatId] = 'AWAITING_ORDER_CONFIRMATION';  
+        stateProductOrder[chatId] = 3;
+        await ShowOrderMenu(client, message, state, contactName, chatId, chat);
+      } 
+  
+      else if (message.body === '0') {
+        console.log('aqui estamos')
+        showMainMenu(client, chatId, message, contactName, state, saudacao, chat);
+        state[chatId] = 'AWAITING_CHOICE';
+      } 
+      else {
+        await chat.sendStateTyping();
+        await client.sendMessage(chatId, '_*Assistente Virtual*_ \nOps, parece que você escolheu uma opção inválida, tente novamente😥');
+        await new Promise(resolve => setTimeout(resolve, 1500)); // Espera 1.5 segundos antes de mostrar o menu
+        await showProductMenu(client, chatId, state, saudacao, chat);
+      }
+    } catch (error) {
+      console.error('Erro ao lidar com o menu de produtos:', error);
+    }
+  }
+//================================================================
+// FUNÇÃO PARA EXIBIR O MENU DE SUPORTE
+async function showSupportMenu(client, chatId, state, saudacao, contactName, chat) {
+    await chat.sendStateTyping();
+    client.sendMessage(chatId, '*Menu de suporte* \n1. Falar com um atendente\n0. Voltar ao menu principal');
+  }
+//=================================================================
+// FUNÇÃO PARA LIDAR COM O SUPORTE
+async function handleSupport(client, chatId, message, state, saudacao, contactName, chat) {
+    try {
+      if (message.body === '1') {
+        const greetingMessage = getGreetingMessage();
+        const diaAtual = verificarDiaDaSemana();
+        const now = new Date();
+        const hour = now.getHours();
+  
+        if(greetingMessage == 'boa madrugada'){
+          await chat.sendStateTyping();
+          await client.sendMessage(chatId, '_*Assistente Virtual*_ \nLamento, mas devido o horário não será possível falar com um atendente no momento, o suporte retornará amanhã 08h. Agradeço a compreensão e tenha uma boa madrugada😴');
+        }
+        else if(diaAtual != 'Domingo' && hour > 8 && hour < 12 && hour > 14 && hour < 18){
+          await chat.sendStateTyping();
+          await client.sendMessage(chatId, '_*Assistente Virtual*_ \nCerto, você está sendo encaminhado para um atendente, as mensagens são respondidas por ordem de envio, as mais antigas primeiro, agradeço a compreesâo...');
+          await client.markUnseenMessage(chatId);
+        }
+        else if(diaAtual == 'Domingo'){
+          await chat.sendStateTyping();
+          await client.sendMessage(chatId, '_*Assistente Virtual*_ \nLamento mas nosso serviço de suporte funciona apenas de segunda à sexta-feira de 08h - 12h e de 14h - 18h e aos sabádos de 08h - 12h.');
+          await client.markUnseenMessage(chatId);
+        }
+        // Aqui você pode adicionar a lógica para conectar com um atendente
+      } 
+      else if (message.body === '0') {
+        
+        showMainMenu(client, chatId, message, contactName, state, saudacao, chat); // Volta ao menu principal
+        state[chatId] = 'AWAITING_CHOICE';
+      }
+      
+      else {
+        await chat.sendStateTyping();
+        await client.sendMessage(chatId, '_*Assistente Virtual*_ \nOps, parece que você escolheu uma opção inválida, tente novamente😥');
+        showSupportMenu(client, chatId, state, saudacao, chat); // Mostra o menu de suporte novamente
+      }
+    } catch (error) {
+      console.error('Erro ao lidar com o suporte:', error);
+    }
+  }
+//============================================================================
+// FUNÇÃO PARA EXIBIR O MENU DE ORDEM
+async function showProductInfoMenu(client, chatId, state, saudacao, contactName, chat) {
+    await chat.sendStateTyping();
+    client.sendMessage(chatId, '_*Assistente Virtual*_ \n*Deseja finalizar o seu pedido?*\n1. Sim\n2. Não\n0. Voltar ao menu principal');
+  }
+//==============================================================================
+async function handleInfoProduct(client, chatId, message, state, saudacao, contactName, chat) {
+    try {
+      if (message.body === '1') {
+        sendMessage(chatId, 'Informações técnicas')
+        // Aqui você pode adicionar a lógica para conectar com um atendente
+      } else if (message.body === '2') {
+        // showMainMenu(client, chatId, message, contactName, state, saudacao); // Volta ao menu principal
+        state[chatId] = 'AWAITING_CHOICE';
+      }
+       else if (message.body === '0') {
+        saudacao[chatId] = 'True'; // ver
+        showMainMenu(client, chatId, message, contactName, state, saudacao); // Volta ao menu principal
+        state[chatId] = 'AWAITING_CHOICE';
+      }
+      else {
+        await chat.sendStateTyping();
+        // await client.sendMessage(chatId, '_*Assistente Virtual*_ \nOps, parece que você escolheu uma opção inválida, tente novamente😥');
+        showProductInfoMenu(client, chatId, state, saudacao); // Mostra o menu de suporte novamente
+      }
+    } catch (error) {
+      console.error('Erro ao lidar com a opção selecionada:', error);
+    }
+  }
+  
+  
 
 //--------------------------------------------------------------------------------------------------
 client.initialize();
