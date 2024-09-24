@@ -175,30 +175,7 @@ async function showMainMenu(client, chatId, message, contactName, state, saudaca
       console.log(saudacaoFrases[randomIndex])
 
       await client.reply(chatId, `${saudacaoFrases[randomIndex]}`, message.id.toString());      
-      saudacao[chatId] = 'True';
-
-      // await client.sendText(
-      //   '120363168227938807@g.us',
-      //   'Novo pedido! @558994210520 | @558994441772',
-      // );
-      
-
-      const grupo = await client.getChatById('120363168227938807@g.us');
-      console.log(grupo);
-      let text = "";
-      let mentions = [];
-
-      membersG = await client.getGroupMembers('120363168227938807@g.us');
-      console.log(membersG);
-      for (let participant of grupo.members) {
-        const contact = await client.getContactById(participant.id._serialized);
-
-        mentions.push(contact);
-        text += ` @${participant.id.user} `;
-    }
-
-    console.log(`*⚠️ATENÇÃO⚠️* \nEai seus patetas, é o seguinte, tá na hora de agendar o jantar, então corre pra não ficar atrás de ticket que nem um cachorro pidão!*\n\nAcesse o link a seguir e reserve a sua janta: http://www.floriano.ifpi.edu.br:8080/CortexMobileIFPI/modulos/minhaConta/solicitarTickets.jsf\n\n` + text, { mentions });
-
+      saudacao[chatId] = 'True'; 
       
     }
 
@@ -370,19 +347,11 @@ async function handleDataCollection(client, message, state, chatId) {
   Email: ${emailClient[chatId]}\nTelefone: ${phoneClient[chatId]}\nEndereço: ${cityClient[chatId]}\n
   Forma de pagamento: ${paymentMethodClient[chatId]}\nProduto do pedido: ${productOrder[chatId]}`);
     
-    await client.startTyping('120363168227938807@g.us');
-    await client.sendText('120363168227938807@g.us', `_*Assistente Virtual*_ \n\n*DADOS DO PEDIDO*\n\nCliente: ${nameClient[chatId]}\n
+    await client.startTyping('120363168227938807@c.us');
+  await client.sendText('120363168227938807@g.us', `_*Assistente Virtual*_ \n\n*DADOS DO PEDIDO*\n\nCliente: ${nameClient[chatId]}\n
   Email: ${emailClient[chatId]}\nTelefone: ${phoneClient[chatId]}\nEndereço: ${cityClient[chatId]}\n
   Forma de pagamento: ${paymentMethodClient[chatId]}\nProduto do pedido: ${productOrder[chatId]}`);
   
-      //@558994210520 | @558994441772 
-
-  await client.sendMentioned(
-    '120363168227938807@g.us',
-    'Novo pedido! @558994210520 | @558994441772',
-    ['558994210520', '558994441772']
-  );
-
     state[chatId] = 'AWAITING_CHOICE';
     await showProductMenu(client, chatId, state, saudacao); // Mostra o menu de produtos novamente
     
