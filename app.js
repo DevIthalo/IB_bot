@@ -47,7 +47,7 @@ client.on('ready', () => {
 
 });
 
-
+//=================================================================================
 // FUNÇÃO PARA SAUDAÇÃO
 function getGreetingMessage() {
     const now = new Date();
@@ -63,42 +63,45 @@ function getGreetingMessage() {
       return 'boa madrugada';
     }
   }
+
+//=================================================================================
+// FUNÇÃO PARA VERIFICAR O DIA DA SEMANA
+function verificarDiaDaSemana() {
+const diasDaSemana = [
+    'Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira',
+    'Quinta-feira', 'Sexta-feira', 'Sábado'
+];
+
+const hoje = new Date();
+const dia = hoje.getDay(); // Retorna um número de 0 a 6 (0 = Domingo, 6 = Sábado)
+
+return diasDaSemana[dia]; // Retorna o nome do dia da semana
+}
+
+//=================================================================================
   
-  // FUNÇÃO PARA VERIFICAR O DIA DA SEMANA
-  function verificarDiaDaSemana() {
-    const diasDaSemana = [
-      'Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira',
-      'Quinta-feira', 'Sexta-feira', 'Sábado'
-    ];
-  
-    const hoje = new Date();
-    const dia = hoje.getDay(); // Retorna um número de 0 a 6 (0 = Domingo, 6 = Sábado)
-  
-    return diasDaSemana[dia]; // Retorna o nome do dia da semana
-  }
-  
-  const produtos = {
-    "SSD M.2 de 256GB": {
-        menu: [
-            "Forma de pagamento",
-            "Garantia",
-            "Especificações técnicas",
-            "Apresentar menu do bot"
-        ]
-    },
-    "SSD SATA 240GB": {
-        menu: [
-            "Forma de pagamento",
-            "Garantia",
-            "Especificações técnicas",
-            "Apresentar menu do bot"
-        ]
-    }
+const produtos = {
+"SSD M.2 de 256GB": {
+    menu: [
+        "Forma de pagamento",
+        "Garantia",
+        "Especificações técnicas",
+        "Apresentar menu do bot"
+    ]
+},
+"SSD SATA 240GB": {
+    menu: [
+        "Forma de pagamento",
+        "Garantia",
+        "Especificações técnicas",
+        "Apresentar menu do bot"
+    ]
+}
 }
     // ... outros produtos
 
-
-// Definição do estado e saudacao fora da função start
+//=================================================================================
+// Definição do estado
 let state = {};
 let saudacao = {};
 let stateProductOrder = {};
@@ -109,6 +112,9 @@ let cityClient = {};
 let paymentMethodClient = {};
 let productOrder = {};
 
+
+
+//=================================================================================
 ///// CONFIGURA A FORMA DE LEITURA DAS MENSAGENS /////
 client.on('message', async (message) => {
     const chatId = message.from;
@@ -182,6 +188,7 @@ client.on('message', async (message) => {
 
 }); 
 
+//=================================================================================
 // FUNÇÃO PARA MOSTRAR O MENU PRINCIPAL
 async function showMainMenu(client, chatId, message, contactName, state, saudacao) {
     try {
@@ -216,7 +223,7 @@ async function showMainMenu(client, chatId, message, contactName, state, saudaca
     }
   }
 
-
+//=================================================================================
 // FUNÇÃO PARA LIDAR COM A ESCOLHA DO MENU PRINCIPAL
 async function handleMenuChoice(client, chatId, message, state, saudacao, contactName) {
     try {
@@ -275,6 +282,8 @@ async function handleMenuChoice(client, chatId, message, state, saudacao, contac
     }
   }
 
+
+//=================================================================================
 // FUNÇÃO PARA EXIBIR O MENU DE PRODUTOS
 async function showProductMenu(client, chatId, state, saudacao, contactName) {
     await client.startTyping(chatId);
