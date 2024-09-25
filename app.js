@@ -188,6 +188,9 @@ client.on('message', async (message) => {
         else  if(state[chatId].includes('COLLECTING_')){
           handleDataCollection(client, message, state, chatId, chat)
         }
+        else if(state[chatId] === 'ADD_MORE_PRODUCTS'){
+            handleAddMoreProducts(client, message, chatId)
+        }
     }
 
 }); 
@@ -298,7 +301,6 @@ async function handleMenuChoice(client, chatId, message, state, saudacao, contac
     }
   }
 
-
 //=================================================================================
 // FUNÇÃO PARA EXIBIR O MENU DE PRODUTOS
 async function showProductMenu(client, chatId, state, saudacao, contactName, chat) {
@@ -360,6 +362,101 @@ async function AwaitingChoiceOrder(client, message, state, contactName, chatId, 
   
     }
   }
+//================================================================
+// FUNÇÃO PARA LIDAR COM O MENU DE PRODUTOS
+async function handleProductMenu(client, chatId, message, state, saudacao, contactName, chat) {
+    try {
+        // Inicializa o carrinho se ele não existir ainda
+        if (!carrinhos[chatId]) {
+            carrinhos[chatId] = [];
+        }
+
+      if (message.body === '1') {
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        await chat.sendStateTyping();
+        await client.sendMessage(chatId, '_*Assistente Virtual*_\nShow de bola! O SSD ADATA 240GB por R$ 191,50 é um excelente investimento para turbinar seu PC. Com ele, seus jogos e programas vão carregar em um piscar de olhos!');
+        carrinhos[chatId].push({ produto: 'SSD 240GB SATA ADATA', preco: 191.50 });
+        carrinhos[chatId].push({ produto: 'produto 2', preco: 191.50 });
+        console.log(carrinhos[chatId]);
+        await perguntarSeQuerMaisProdutos(client, chatId);
+        // state[chatId] = 'AWAITING_ORDER_CONFIRMATION';  
+        stateProductOrder[chatId] = 1;
+        // await ShowOrderMenu(client, message, state, contactName, chatId, chat);
+      }
+      else if (message.body === '2') {
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        await chat.sendStateTyping();
+        await client.sendMessage(chatId, '_*Assistente Virtual*_ \nÓtima escolha! Os Airdots por apenas R$ 60,00 oferecem um som incrível e muita liberdade para você curtir sua música favorita!');
+        state[chatId] = 'AWAITING_ORDER_CONFIRMATION';  
+        stateProductOrder[chatId] = 2;
+        await ShowOrderMenu(client, message, state, contactName, chatId, chat);
+      }
+      else if(message.body === '3') {
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        await chat.sendStateTyping();
+        await client.sendMessage(chatId, '_*Assistente Virtual*_ \Perfeito para gamers e profissionais! O headset ON-FN628 por R$ 70,00 oferece um som surround de alta qualidade e um microfone com cancelamento de ruído.');
+        state[chatId] = 'AWAITING_ORDER_CONFIRMATION';  
+        stateProductOrder[chatId] = 3;
+        await ShowOrderMenu(client, message, state, contactName, chatId, chat);
+      } 
+  
+      else if (message.body === '0') {
+        console.log('aqui estamos')
+        showMainMenu(client, chatId, message, contactName, state, saudacao, chat);
+        state[chatId] = 'AWAITING_CHOICE';
+      } 
+      else {
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        await chat.sendStateTyping();
+        await client.sendMessage(chatId, '_*Assistente Virtual*_ \nOps, parece que você escolheu uma opção inválida, tente novamente😥');
+        await new Promise(resolve => setTimeout(resolve, 1500)); // Espera 1.5 segundos antes de mostrar o menu
+        await showProductMenu(client, chatId, state, saudacao, chat);
+      }
+    } catch (error) {
+      console.error('Erro ao lidar com o menu de produtos:', error);
+    }
+  }
+
+//================================================================
+// FUNÇÃO PARA PERGUNTAR SE O CLIENTE QUER ADICIONAR MAIS PRODUTO NO CARRINHO
+async function perguntarSeQuerMaisProdutos(client, chatId) {
+    await client.sendMessage(chatId, 'Deseja adicionar mais produtos ao seu pedido?\n1. Sim\n2. Não, finalizar pedido');
+    state[chatId] = 'ADD_MORE_PRODUCTS'
+}
+
+//================================================================
+// FUNÇÃO PARA LIDAR COM A RESPOSTA DA ADIÇÃO DO CARRINHO
+async function handleAddMoreProducts(client, message, chatId) {
+    if (message.body === '1') {
+        showProductMenu(client, chatId); // Mostra o menu de produtos novamente
+    } else if (message.body === '2') {
+        await finalizarPedido(client, chatId);
+    } else {
+        await client.sendMessage(chatId, 'Opção inválida, tente novamente.');
+        await perguntarSeQuerMaisProdutos(client, chatId); // Repete a pergunta
+    }
+}
+//=================================================================
+// FUNÇÃO PARA A FINALIZAÇÃ DE PEDIDO
+async function finalizarPedido(client, chatId) {
+    const carrinho = carrinhos[chatId];
+    if (carrinho && carrinho.length > 0) {
+        let resumo = 'Seu pedido contém:\n';
+        let total = 0;
+        carrinho.forEach((item, index) => {
+            resumo += `${index + 1}. ${item.produto} - R$ ${item.preco.toFixed(2)}\n`;
+            total += item.preco;
+        });
+        resumo += `\nTotal: R$ ${total.toFixed(2)}\n`;
+        await client.sendMessage(chatId, resumo);
+        await client.sendMessage(chatId, 'Obrigado por comprar conosco! Seu pedido foi registrado.');
+        // Limpa o carrinho após finalizar o pedido
+        carrinhos[chatId] = [];
+    } else {
+        await client.sendMessage(chatId, 'Seu carrinho está vazio!');
+    }
+}
+
 //================================================================
 // FUNÇÃO PARA LIDAR COM A COLETA DE DADOS
 async function handleDataCollection(client, message, state, chatId, chat) {
@@ -440,60 +537,6 @@ async function handleDataCollection(client, message, state, chatId, chat) {
 function validateEmail(email) {
     const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return re.test(String(email).toLowerCase());
-  }
-
-//================================================================
-// FUNÇÃO PARA LIDAR COM O MENU DE PRODUTOS
-async function handleProductMenu(client, chatId, message, state, saudacao, contactName, chat) {
-    try {
-        // Inicializa o carrinho se ele não existir ainda
-        if (!carrinhos[chatId]) {
-            carrinhos[chatId] = [];
-        }
-
-      if (message.body === '1') {
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        await chat.sendStateTyping();
-        await client.sendMessage(chatId, '_*Assistente Virtual*_\nShow de bola! O SSD ADATA 240GB por R$ 191,50 é um excelente investimento para turbinar seu PC. Com ele, seus jogos e programas vão carregar em um piscar de olhos!');
-        carrinhos[chatId].push({ produto: 'SSD 240GB SATA ADATA', preco: 191.50 });
-        carrinhos[chatId].push({ produto: 'produto 2', preco: 191.50 });
-        console.log(carrinhos[chatId]);
-        state[chatId] = 'AWAITING_ORDER_CONFIRMATION';  
-        stateProductOrder[chatId] = 1;
-        await ShowOrderMenu(client, message, state, contactName, chatId, chat);
-      }
-      else if (message.body === '2') {
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        await chat.sendStateTyping();
-        await client.sendMessage(chatId, '_*Assistente Virtual*_ \nÓtima escolha! Os Airdots por apenas R$ 60,00 oferecem um som incrível e muita liberdade para você curtir sua música favorita!');
-        state[chatId] = 'AWAITING_ORDER_CONFIRMATION';  
-        stateProductOrder[chatId] = 2;
-        await ShowOrderMenu(client, message, state, contactName, chatId, chat);
-      }
-      else if(message.body === '3') {
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        await chat.sendStateTyping();
-        await client.sendMessage(chatId, '_*Assistente Virtual*_ \Perfeito para gamers e profissionais! O headset ON-FN628 por R$ 70,00 oferece um som surround de alta qualidade e um microfone com cancelamento de ruído.');
-        state[chatId] = 'AWAITING_ORDER_CONFIRMATION';  
-        stateProductOrder[chatId] = 3;
-        await ShowOrderMenu(client, message, state, contactName, chatId, chat);
-      } 
-  
-      else if (message.body === '0') {
-        console.log('aqui estamos')
-        showMainMenu(client, chatId, message, contactName, state, saudacao, chat);
-        state[chatId] = 'AWAITING_CHOICE';
-      } 
-      else {
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        await chat.sendStateTyping();
-        await client.sendMessage(chatId, '_*Assistente Virtual*_ \nOps, parece que você escolheu uma opção inválida, tente novamente😥');
-        await new Promise(resolve => setTimeout(resolve, 1500)); // Espera 1.5 segundos antes de mostrar o menu
-        await showProductMenu(client, chatId, state, saudacao, chat);
-      }
-    } catch (error) {
-      console.error('Erro ao lidar com o menu de produtos:', error);
-    }
   }
 //================================================================
 // FUNÇÃO PARA EXIBIR O MENU DE SUPORTE
@@ -576,8 +619,6 @@ async function handleInfoProduct(client, chatId, message, state, saudacao, conta
     }
   }
   
-  
-
 //--------------------------------------------------------------------------------------------------
 client.initialize();
 
