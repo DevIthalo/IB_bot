@@ -186,10 +186,13 @@ client.on('message', async (message) => {
           return; // Retorna aqui para evitar que o fluxo continue
         }
         else  if(state[chatId].includes('COLLECTING_')){
-          handleDataCollection(client, message, state, chatId, chat)
+          await handleDataCollection(client, message, state, chatId, chat)
         }
         else if(state[chatId] === 'ADD_MORE_PRODUCTS'){
-            handleAddMoreProducts(client, message, chatId, chat, saudacao, state)
+            await handleAddMoreProducts(client, message, chatId, chat, saudacao, state)
+        }
+        else if(state[chatId] === 'ADD_QUANTITY_PRODUCTS'){
+            await AwaitQuantity(client, message, state, contactName, chatId, chat);
         }
     }
 
@@ -214,8 +217,8 @@ async function showMainMenu(client, chatId, message, contactName, state, saudaca
               `Bem-vindo(a), ${contactName}! Estou à sua disposição para auxiliá-lo(a) em suas compras. Como posso ajudar hoje?`, 
             ]
             
-            const randomIndex = Math.floor(Math.random() * saudacaoFrases.length);
-            console.log(saudacaoFrases[randomIndex])
+        const randomIndex = Math.floor(Math.random() * saudacaoFrases.length);
+        console.log(saudacaoFrases[randomIndex])
         await new Promise(resolve => setTimeout(resolve, 3500))
         await message.reply(`${saudacaoFrases[randomIndex]}`); 
         // await chat.sendStatePaused();     
@@ -399,8 +402,13 @@ async function AwaitingChoiceOrder(client, message, state, contactName, chatId, 
         productOrder[chatId] = 'HEADSET BLUETOOTH 5.0 ON-FN628'
         carrinhos[chatId].push({ produto: 'HEADSET BLUETOOTH 5.0 ON-FN628', preco: 70.00 });
       }
-      await perguntarSeQuerMaisProdutos(client, chatId);
-      state[chatId] = 'ADD_MORE_PRODUCTS'
+
+      await AwaitQuantity(client, message, state, contactName, chatId, chat);
+      state[chatId] = 'ADD_QUANTITY_PRODUCTS';
+
+
+    //   await perguntarSeQuerMaisProdutos(client, chatId);
+    //   state[chatId] = 'ADD_MORE_PRODUCTS'
       await new Promise(resolve => setTimeout(resolve, 1500)); // Espera 1.5 segundos antes de mostrar o menu
     //   await chat.sendStateTyping();
     //   await client.sendMessage(chatId, '_*Assistente Virtual*_ \nÓtimo, para finalizarmos o seu pedido, informe o seu nome completo.');
@@ -423,11 +431,30 @@ async function AwaitingChoiceOrder(client, message, state, contactName, chatId, 
     }
   }
 
-
+//================================================================
+// FUNÇÃO PARA PERGUNTAR A QUANTIADE DO PRODUTO PARA ADICIONAR AO CARRINHO
+async function AwaitQuantity(client, message, state, contactName, chatId, chat) {
+    await client.sendMessage(chatId, '_*Assistente Virtual*_ \nPor favor, me informe a quantidade desejada');
+    state[chatId] = 'ADD_QUANTITY_PRODUCTS'
+}
+//================================================================
+// FUNÇÃO PARA LIDAR COM A QUANTIDADE INFORMADA
+async function handleAddQuantityProducts(client, message, chatId, chat, saudacao, state) {
+    const quantity = 0
+    const quantityProductCLient = parseInt(message.body, 10)
+    await chat.sendStateTyping();
+    if(quantityProductCLient < 1){
+        await client.sendMessage(chatId, '_*Assistente Virtual*_ \nLamento mas você deve informar uma quantidade maior que 0😢');
+        await AwaitQuantity(client, message, state, contactName, chatId, chat);
+    }
+    else{
+        await client.sendMessage(chatId, '_*Assistente Virtual*_ \nCerto!');
+    }
+}
 //================================================================
 // FUNÇÃO PARA PERGUNTAR SE O CLIENTE QUER ADICIONAR MAIS PRODUTO NO CARRINHO
 async function perguntarSeQuerMaisProdutos(client, chatId) {
-    await client.sendMessage(chatId, 'Deseja adicionar mais produtos ao seu pedido?\n1. Sim\n2. Não, finalizar pedido');
+    await client.sendMessage(chatId, '_*Assistente Virtual*_ \nDeseja adicionar mais produtos ao seu pedido?\n1. Sim\n2. Não, finalizar pedido');
     state[chatId] = 'ADD_MORE_PRODUCTS'
 }
 
@@ -452,7 +479,7 @@ async function handleAddMoreProducts(client, message, chatId, chat, saudacao, st
 async function finalizarPedido(client, chatId) {
     const carrinho = carrinhos[chatId];
     if (carrinho && carrinho.length > 0) {
-        let resumo = 'Seu pedido contém:\n';
+        let resumo = '_*Assistente Virtual*_ \nSeu pedido contém:\n';
         let total = 0;
         carrinho.forEach((item, index) => {
             resumo += `${index + 1}. ${item.produto} - R$ ${item.preco.toFixed(2)}\n`;
@@ -460,7 +487,7 @@ async function finalizarPedido(client, chatId) {
         });
         resumo += `\nTotal: R$ ${total.toFixed(2)}\n`;
         await client.sendMessage(chatId, resumo);
-        await client.sendMessage(chatId, 'Obrigado por comprar conosco! Seu pedido foi registrado.');
+        // await client.sendMessage(chatId, '_*Assistente Virtual*_ \nObrigado por comprar conosco! Seu pedido foi registrado.');
         // Limpa o carrinho após finalizar o pedido
         carrinhos[chatId] = [];
     } else {
