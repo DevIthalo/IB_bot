@@ -111,7 +111,6 @@ let phoneClient = {};
 let cityClient = {};
 let paymentMethodClient = {};
 let productOrder = {};
-
 //================================================================================
 // DEFININDO O CARRINHO DE COMPRAS
 const carrinhos = {};
@@ -192,7 +191,7 @@ client.on('message', async (message) => {
             await handleAddMoreProducts(client, message, chatId, chat, saudacao, state)
         }
         else if(state[chatId] === 'ADD_QUANTITY_PRODUCTS'){
-            await AwaitQuantity(client, message, state, contactName, chatId, chat);
+            await handleAddQuantityProducts(client, message, chatId, chat, saudacao, state);
         }
     }
 
@@ -392,7 +391,7 @@ async function AwaitingChoiceOrder(client, message, state, contactName, chatId, 
     if (message.body === '1') {
       if(stateProductOrder[chatId] === 1){
         productOrder[chatId] = 'SSD ADATA 240GB'
-        carrinhos[chatId].push({ produto: 'SSD 240GB SATA ADATA', preco: 191.50 });
+        carrinhos[chatId].push({ produto: 'SSD 240GB SATA ADATA', preco: 191.50, quantidade: 0 });
     }
     else if(stateProductOrder[chatId] === 2){
         productOrder[chatId] = 'FONE DE OUVIDO BLUETOOTH TWS AIRDOTS'
@@ -439,7 +438,7 @@ async function AwaitQuantity(client, message, state, contactName, chatId, chat) 
 }
 //================================================================
 // FUNÇÃO PARA LIDAR COM A QUANTIDADE INFORMADA
-async function handleAddQuantityProducts(client, message, chatId, chat, saudacao, state) {
+async function handleAddQuantityProducts(client, message, chatId, chat, saudacao, state, contactName) {
     const quantity = 0
     const quantityProductCLient = parseInt(message.body, 10)
     await chat.sendStateTyping();
@@ -449,6 +448,10 @@ async function handleAddQuantityProducts(client, message, chatId, chat, saudacao
     }
     else{
         await client.sendMessage(chatId, '_*Assistente Virtual*_ \nCerto!');
+        await perguntarSeQuerMaisProdutos(client, chatId);
+        state[chatId] = 'ADD_MORE_PRODUCTS'
+        const lastProductIndex = carrinhos[chatId].length - 1;
+        carrinhos[chatId][lastProductIndex].quantidade = quantityProductCLient
     }
 }
 //================================================================
@@ -482,8 +485,8 @@ async function finalizarPedido(client, chatId) {
         let resumo = '_*Assistente Virtual*_ \nSeu pedido contém:\n';
         let total = 0;
         carrinho.forEach((item, index) => {
-            resumo += `${index + 1}. ${item.produto} - R$ ${item.preco.toFixed(2)}\n`;
-            total += item.preco;
+            resumo += `${index + 1}. ${item.produto} - R$ ${item.preco.toFixed(2)}\n - Quantidade: ${item.quantidade}`;
+            total += item.preco * item.quantidade;
         });
         resumo += `\nTotal: R$ ${total.toFixed(2)}\n`;
         await client.sendMessage(chatId, resumo);
