@@ -111,6 +111,7 @@ let phoneClient = {};
 let cityClient = {};
 let paymentMethodClient = {};
 let productOrder = {};
+let numPedido = 0;
 //================================================================================
 // DEFININDO O CARRINHO DE COMPRAS
 const carrinhos = {};
@@ -185,7 +186,7 @@ client.on('message', async (message) => {
           return; // Retorna aqui para evitar que o fluxo continue
         }
         else  if(state[chatId].includes('COLLECTING_')){
-          await handleDataCollection(client, message, state, chatId, chat)
+          await handleDataCollection(client, chatId, message, contactName, state, saudacao, chat)
         }
         else if(state[chatId] === 'ADD_MORE_PRODUCTS'){
             await handleAddMoreProducts(client, message, chatId, chat, saudacao, state)
@@ -391,15 +392,16 @@ async function AwaitingChoiceOrder(client, message, state, contactName, chatId, 
     if (message.body === '1') {
       if(stateProductOrder[chatId] === 1){
         productOrder[chatId] = 'SSD ADATA 240GB'
-        carrinhos[chatId].push({ produto: 'SSD 240GB SATA ADATA', preco: 191.50, quantidade: 0 });
+        // carrinhos[chatId].push({ produto: 'SSD 240GB SATA ADATA', preco: 191.50, quantidade: 0 });
+        console.log(carrinhos, ' ::::1')
     }
     else if(stateProductOrder[chatId] === 2){
         productOrder[chatId] = 'FONE DE OUVIDO BLUETOOTH TWS AIRDOTS'
-        carrinhos[chatId].push({ produto: 'FONE DE OUVIDO BLUETOOTH TWS AIRDOTS', preco: 60.00 });
+        // carrinhos[chatId].push({ produto: 'FONE DE OUVIDO BLUETOOTH TWS AIRDOTS', preco: 60.00, quantidade: 0 });
       }
       else if(stateProductOrder[chatId] === 3){
         productOrder[chatId] = 'HEADSET BLUETOOTH 5.0 ON-FN628'
-        carrinhos[chatId].push({ produto: 'HEADSET BLUETOOTH 5.0 ON-FN628', preco: 70.00 });
+        // carrinhos[chatId].push({ produto: 'HEADSET BLUETOOTH 5.0 ON-FN628', preco: 70.00, quantidade: 0 });
       }
 
       await AwaitQuantity(client, message, state, contactName, chatId, chat);
@@ -439,26 +441,59 @@ async function AwaitQuantity(client, message, state, contactName, chatId, chat) 
 //================================================================
 // FUNÇÃO PARA LIDAR COM A QUANTIDADE INFORMADA
 async function handleAddQuantityProducts(client, message, chatId, chat, saudacao, state, contactName) {
-    const quantity = 0
-    const quantityProductCLient = parseInt(message.body, 10)
+    const quantityProductClient = parseInt(message.body, 10);
     await chat.sendStateTyping();
-    if(quantityProductCLient < 1){
-        await client.sendMessage(chatId, '_*Assistente Virtual*_ \nLamento mas você deve informar uma quantidade maior que 0😢');
+
+    // Verifica se a quantidade é válida
+    if(quantityProductClient < 1) {
+        await client.sendMessage(chatId, '_*Assistente Virtual*_ \nLamento, mas você deve informar uma quantidade maior que 0😢');
         await AwaitQuantity(client, message, state, contactName, chatId, chat);
+        return;
     }
-    else{
-        await client.sendMessage(chatId, '_*Assistente Virtual*_ \nCerto!');
-        await perguntarSeQuerMaisProdutos(client, chatId);
-        state[chatId] = 'ADD_MORE_PRODUCTS'
-        const lastProductIndex = carrinhos[chatId].length - 1;
-        carrinhos[chatId][lastProductIndex].quantidade = quantityProductCLient
+
+    // Inicializa o carrinho se ele não existir
+    if (!carrinhos[chatId]) {
+        carrinhos[chatId] = [];
     }
+
+    // Obtem o produto atual do pedido
+    const currentProduct = productOrder[chatId];
+    console.log('Produto atual: ', currentProduct);
+
+    // Verifica se o produto já está no carrinho
+    const produtoExistente = carrinhos[chatId].find(item => item.produto === currentProduct);
+
+    if (produtoExistente) {
+        // Se o produto já estiver no carrinho, incrementa a quantidade
+        produtoExistente.quantidade += quantityProductClient;
+        console.log('Produto existente, quantidade atualizada:', produtoExistente);
+    } else {
+        // Adiciona o produto ao carrinho com a quantidade informada
+        let preco = 0;
+        if (stateProductOrder[chatId] === 1) {
+            preco = 191.50;
+        } else if (stateProductOrder[chatId] === 2) {
+            preco = 60.00;
+        } else if (stateProductOrder[chatId] === 3) {
+            preco = 70.00;
+        }
+
+        carrinhos[chatId].push({ produto: currentProduct, preco: preco, quantidade: quantityProductClient });
+        console.log('Produto adicionado ao carrinho:', carrinhos[chatId]);
+    }
+
+    await client.sendMessage(chatId, '_*Assistente Virtual*_ \nCerto! O produto foi adicionado ao seu pedido.');
+    await perguntarSeQuerMaisProdutos(client, chatId);
+    state[chatId] = 'ADD_MORE_PRODUCTS';
+    console.log('Carrinho atualizado:', carrinhos[chatId]);
 }
+
 //================================================================
 // FUNÇÃO PARA PERGUNTAR SE O CLIENTE QUER ADICIONAR MAIS PRODUTO NO CARRINHO
 async function perguntarSeQuerMaisProdutos(client, chatId) {
     await client.sendMessage(chatId, '_*Assistente Virtual*_ \nDeseja adicionar mais produtos ao seu pedido?\n1. Sim\n2. Não, finalizar pedido');
     state[chatId] = 'ADD_MORE_PRODUCTS'
+    console.log(carrinhos, ' ::::2');
 }
 
 //================================================================
@@ -480,19 +515,23 @@ async function handleAddMoreProducts(client, message, chatId, chat, saudacao, st
 //=================================================================
 // FUNÇÃO PARA A FINALIZAÇÃ DE PEDIDO
 async function finalizarPedido(client, chatId) {
+    console.log(carrinhos, ' :::4');
     const carrinho = carrinhos[chatId];
+    console.log(carrinho, '::::5');
     if (carrinho && carrinho.length > 0) {
         let resumo = '_*Assistente Virtual*_ \nSeu pedido contém:\n';
         let total = 0;
         carrinho.forEach((item, index) => {
-            resumo += `${index + 1}. ${item.produto} - R$ ${item.preco.toFixed(2)}\n - Quantidade: ${item.quantidade}`;
+            resumo += `\n${index + 1}. ${item.produto} - R$ ${item.preco.toFixed(2)}\n - Quantidade: ${item.quantidade}\n\n`;
             total += item.preco * item.quantidade;
+            console.log(item.produto, ' item.pedido')
+            console.log(item.produto, ' item.pedido')
         });
         resumo += `\nTotal: R$ ${total.toFixed(2)}\n`;
         await client.sendMessage(chatId, resumo);
         // await client.sendMessage(chatId, '_*Assistente Virtual*_ \nObrigado por comprar conosco! Seu pedido foi registrado.');
         // Limpa o carrinho após finalizar o pedido
-        carrinhos[chatId] = [];
+        // carrinhos[chatId] = [];
     } else {
         await client.sendMessage(chatId, 'Seu carrinho está vazio!');
     }
@@ -546,31 +585,50 @@ async function handleDataCollection(client, message, state, chatId, chat) {
       
       await new Promise(resolve => setTimeout(resolve, 2000)); // Espera 1.5 segundos antes de mostrar o menu
       await chat.sendStateTyping();
-      await client.sendMessage(chatId, `_*Assistente Virtual*_ \n\n*DADOS DO PEDIDO*\n\nCliente: ${nameClient[chatId]}\nEmail: ${emailClient[chatId]}\nTelefone: ${phoneClient[chatId]}\nEndereço: ${cityClient[chatId]}\nForma de pagamento: ${paymentMethodClient[chatId]}\nProduto do pedido: ${productOrder[chatId]}`);
-      
-      const chatID = await client.getChatById('120363168227938807@g.us');
-      let text = "";
-      let mentions = [];
-      const author = await message.getContact();
-      const botWid = client.info.wid;
-      
-      for (let participant of chatID.participants) {
-          if (participant.id.user !== botWid.user){
-              const contact = await client.getContactById(participant.id._serialized);
-              mentions.push(participant.id._serialized);  // Adiciona diretamente o ID do participante
-              text += `@${participant.id.user} `;
-          }
-      }
-      await chatID.sendMessage(`_*Assistente Virtual*_ \n\n*DADOS DO PEDIDO*\n\nCliente: ${nameClient[chatId]}\nEmail: ${emailClient[chatId]}\nTelefone: ${phoneClient[chatId]}\nEndereço: ${cityClient[chatId]}\nForma de pagamento: ${paymentMethodClient[chatId]}\nProduto do pedido: ${productOrder[chatId]}\n\n${text}`, { mentions });
+      // Gera o resumo do pedido com os dados do cliente e os produtos do carrinho
+        // Verifica se o carrinho tem produtos
+        numPedido += 1;
+        console.log(carrinhos, ' :::6')
+        console.log(carrinhos[chatId], ' carrinhos[chatId]')
+        const carrinho = carrinhos[chatId];
+        console.log(carrinho)
+        let resumo = `_*Assistente Virtual*_ \n\n*DADOS DO PEDIDO*\n\nCliente: ${nameClient[chatId]}\nEmail: ${emailClient[chatId]}\nTelefone: ${phoneClient[chatId]}\nEndereço: ${cityClient[chatId]}\nForma de pagamento: ${paymentMethodClient[chatId]}\n\n*Produtos no pedido:*\n`;
+        
+        let total = 0;
+        carrinho.forEach((item, index) => {
+            resumo += `\n${index + 1}. ${item.produto} - R$ ${item.preco.toFixed(2)} | Quantidade: ${item.quantidade}\n\n`;
+            console.log(resumo);
+            console.log(item.produto);
+            total += item.preco * item.quantidade;
+        });
+        resumo += `\n*VALOR TOTAL DO PEDIDO:* R$ ${total.toFixed(2)}`;
+        
+        // Envia o resumo para o cliente
+        await client.sendMessage(chatId, resumo);
 
-    //   await client.startTyping('120363168227938807@c.us');
-    // await client.sendMessage('120363168227938807@g.us', `_*Assistente Virtual*_ \n\n*DADOS DO PEDIDO*\n\nCliente: ${nameClient[chatId]}\nEmail: ${emailClient[chatId]}\nTelefone: ${phoneClient[chatId]}\nEndereço: ${cityClient[chatId]}\nForma de pagamento: ${paymentMethodClient[chatId]}\nProduto do pedido: ${productOrder[chatId]}`);
-    
-      state[chatId] = 'AWAITING_CHOICE';
-      await showProductMenu(client, chatId, state, saudacao, chat); // Mostra o menu de produtos novamente
-      
-      await chat.markUnread(chatId);// Marca a mensagem como não lida para não aparecer na lista de novas mensagens
-    }
+        
+        const chatID = await client.getChatById('120363168227938807@g.us');
+        const grupoId = '120363168227938807@g.us'; // ID do grupo
+        let text = "";
+        let mentions = [];
+        const author = await message.getContact();
+        const botWid = client.info.wid;
+        
+        for (let participant of chatID.participants) {
+            if (participant.id.user !== botWid.user){
+                const contact = await client.getContactById(participant.id._serialized);
+                mentions.push(participant.id._serialized);  // Adiciona diretamente o ID do participante
+                text += `@${participant.id.user} `;
+            }
+        }
+        // await chatID.sendMessage(`_*Assistente Virtual*_ \n\n*DADOS DO PEDIDO*\n\nCliente: ${nameClient[chatId]}\nEmail: ${emailClient[chatId]}\nTelefone: ${phoneClient[chatId]}\nEndereço: ${cityClient[chatId]}\nForma de pagamento: ${paymentMethodClient[chatId]}\nProduto do pedido: ${productOrder[chatId]}\n\n${text}`, { mentions });
+
+        // Se necessário, envia o resumo para um grupo
+        await client.sendMessage(grupoId, resumo, { mentions }); // Envia o resumo para o grup
+        
+        showMainMenu(client, chatId, message, contactName, state, saudacao, chat);
+        state[chatId] = 'AWAITING_CHOICE';
+}
     // Continue da mesma forma para o estado de coleta de endereço e forma de pagamento...
   }
 //================================================================
